@@ -1,0 +1,40 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+// 统一配置子项目（插件）的 SDK 版本，避免插件报错
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                // 如果插件没有显式设置，则提供一个默认值
+                if (it.hasProperty('compileSdkVersion') && it.compileSdkVersion == null) {
+                    compileSdkVersion 35
+                }
+                if (it.hasProperty('buildToolsVersion') && it.buildToolsVersion == null) {
+                    buildToolsVersion "35.0.0"
+                }
+                defaultConfig {
+                    if (it.hasProperty('minSdkVersion') && it.minSdkVersion == null) {
+                        minSdkVersion 21
+                    }
+                    if (it.hasProperty('targetSdkVersion') && it.targetSdkVersion == null) {
+                        targetSdkVersion 35
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
